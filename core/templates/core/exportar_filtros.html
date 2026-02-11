@@ -1,0 +1,43 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-funnel"></i> Generar Reporte Excel</h5>
+            </div>
+            <div class="card-body">
+                <form action="{% url 'exportar_excel' %}" method="GET">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Categoría</label>
+                        <select name="categoria" class="form-select">
+                            <option value="todas">-- Todas las Categorías --</option>
+                            {% for cat in categorias %}
+                            <option value="{{ cat.id }}">{{ cat.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Subcategoría</label>
+                        <select name="subcategoria" class="form-select">
+                            <option value="todas">-- Todas las Subcategorías --</option>
+                            {% for sub in subcategorias %}
+                            <option value="{{ sub.id }}">{{ sub.nombre }} ({{ sub.categoria.nombre }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-file-earmark-excel"></i> Descargar Reporte
+                        </button>
+                        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

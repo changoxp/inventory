@@ -1,0 +1,80 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<style>
+    .breadcrumb-item.active {
+        color: #0d6efd;
+        /* Color primario de Bootstrap */
+        font-weight: 600;
+    }
+
+    .breadcrumb {
+        font-size: 1rem;
+    }
+</style>
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb shadow-sm p-3 mb-4 bg-light rounded">
+            <li class="breadcrumb-item"><a href="{% url 'home_categorias' %}">Inicio</a></li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'items_por_categoria' item.subcategoria.categoria.id %}">
+                    {{ item.subcategoria.categoria.nombre }}
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'items_por_subcategoria' item.subcategoria.categoria.id item.subcategoria.id %}">
+                    {{ item.subcategoria.nombre }}
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{{ item.nombre }}</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow border-0">
+        <div class="row g-0">
+            <div class="col-md-4 bg-light d-flex align-items-center justify-content-center p-3">
+                {% if item.imagen %}
+                <img src="{{ item.imagen.url }}" class="img-fluid rounded shadow-sm" alt="{{ item.nombre }}"
+                    style="max-height: 400px;">
+                {% else %}
+                <div class="text-muted text-center">
+                    <i class="bi bi-image" style="font-size: 4rem;"></i>
+                    <p>Sin imagen disponible</p>
+                </div>
+                {% endif %}
+            </div>
+            <div class="col-md-8">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <h2 class="card-title text-primary">{{ item.nombre }}</h2>
+                        <span
+                            class="badge {% if item.stock <= item.stock_minimo %}bg-danger{% else %}bg-success{% endif %} fs-6">
+                            Stock: {{ item.stock }}
+                        </span>
+                    </div>
+                    <p class="text-muted">SKU: <strong>{{ item.sku }}</strong></p>
+                    <hr>
+
+                    <div class="row mt-4">
+                        <div class="col-6">
+                            <p class="mb-1 text-muted">Ubicación / Subcategoría</p>
+                            <h5>{{ item.subcategoria.nombre }}</h5>
+                        </div>
+                        <div class="col-6">
+                            <p class="mb-1 text-muted">Stock Mínimo de Alerta</p>
+                            <h5>{{ item.stock_minimo }} unidades</h5>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 d-flex gap-2">
+                        <a href="{% url 'items_por_subcategoria' item.subcategoria.categoria.id item.subcategoria.id %}"
+                            class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Volver a {{ item.subcategoria.nombre }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

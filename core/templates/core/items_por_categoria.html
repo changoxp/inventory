@@ -1,0 +1,224 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Inventario - {{ categoria.nombre }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-md-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a href="{% url 'home_categorias' %}"
+                        class="text-decoration-none">Inicio</a></li>
+                <li class="breadcrumb-item active">{{ categoria.nombre }}</li>
+            </ol>
+        </nav>
+        <h2 class="fw-bold">Categoría: {{ categoria.nombre }}</h2>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{% url 'crear_item_subcategoria' subcategoria_activa.id %}" class="btn btn-success">
+            ➕ Agregar producto aquí
+        </a>
+    </div>
+</div>
+
+<div class="d-flex justify-content-between mb-3">
+    <h3>{{ subcategoria.nombre }}</h3>
+    {% if items %}
+    <a href="{% url 'reporte_subcategoria' items.0.subcategoria.id %}" target="_blank" class="btn btn-outline-dark">
+        📋 Generar Reporte PDF
+    </a>
+    {% else %}
+    <p class="text-muted">No hay ítems para generar reporte en esta categoría.</p>
+    {% endif %}
+</div>
+
+<a href="{% url 'pagina_exportar' %}" class="btn btn-success mb-3">
+    <i class="bi bi-file-earmark-excel"></i> Descargar Excel
+</a>
+
+<div class="mb-3">
+    <div class="input-group shadow-sm">
+        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search">🔍</i></span>
+        <input type="text" id="buscadorItems" class="form-control border-start-0"
+            placeholder="Buscar por nombre o SKU...">
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-3 mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-dark text-white fw-bold">
+                📁 Subcategorías
+            </div>
+            <div class="list-group">
+                <h5 class="mb-3">Subcategorías de {{ categoria.nombre }}</h5>
+                {% for sub in subcategorias %}
+                <a href="{% url 'items_por_subcategoria' categoria.id sub.id %}"
+                    class="list-group-item list-group-item-action {% if sub.id == subcategoria_activa.id %}active{% endif %}">
+                    {{ sub.nombre }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-9">
+        <div class="card border-0 shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">SKU / Nombre</th>
+                            <th>Subcategoría</th>
+                            <th>Stock</th>
+                            <th>Precio</th>
+                            <th class="text-end pe-4">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td class="ps-4">
+                                <span class="d-block fw-bold text-dark">{{ item.nombre }}</span>
+                                <small class="text-muted font-monospace">{{ item.sku }}</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">{{ item.subcategoria.nombre }}</span>
+                            </td>
+                            <td class="fw-bold">
+                                {% if item.stock <= 0 %} <span class="badge bg-dark">Agotado</span>
+
+                                    {% elif item.stock > item.stock_minimo %}
+                                    <span class="badge bg-success">Saludable ({{ item.stock }})</span>
+
+                                    {% elif item.stock == item.stock_minimo %}
+                                    <span class="badge bg-warning text-dark">Límite ({{ item.stock }})</span>
+
+                                    {% else %}
+                                    <span class="badge bg-danger">Crítico ({{ item.stock }})</span>
+
+                                    {% endif %}
+                            </td>
+                            <td>${{ item.precio }}</td>
+                            <td class="text-end pe-4">
+                                <a href="{% url 'detalle_item' item.id %}" class="btn btn-sm btn-info">Ver Ficha</a>
+                            </td>
+                            <td class="text-end pe-4">
+                                <button type="button" class="btn btn-sm btn-outline-danger me-1" data-bs-toggle="modal"
+                                    data-bs-target="#salidaRapidaModal" data-item-id="{{ item.id }}"
+                                    data-item-nombre="{{ item.nombre }}" data-item-stock="{{ item.stock }}">
+                                    ➖ Salida
+                                </button>
+
+                                {% load auth_extras %}<div class="btn-group">
+                                    <a href="{% url 'detalle_item' item.id %}" class="btn btn-sm btn-info">👁️ Ver</a>
+
+                                    {% if request.user|has_group:"Administrador" or request.user.is_superuser %}
+                                    <a href="{% url 'editar_item' item.id %}" class="btn btn-sm btn-warning">✏️
+                                        Editar</a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <p class="mb-0">No se encontraron productos en esta selección.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="salidaRapidaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+            <form id="formSalidaRapida" method="POST" action="">
+                {% csrf_token %}
+                <div class="modal-header bg-danger text-white py-2">
+                    <h6 class="modal-title">Salida: <span id="modalItemNombre"></span></h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-3">
+                        <small class="text-muted d-block">Stock disponible: <strong
+                                id="modalItemStock"></strong></small>
+                    </div>
+                    <input type="hidden" name="tipo" value="SALIDA">
+                    <div class="form-group">
+                        <label class="small fw-bold">Cantidad a retirar:</label>
+                        <input type="number" name="cantidad" id="modalInputCantidad" class="form-control" min="1"
+                            required>
+                        <div id="modalError" class="text-danger small mt-1 d-none">Stock insuficiente</div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="submit" id="btnConfirmarSalida" class="btn btn-danger w-100">Confirmar Salida</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Envolvemos todo en este evento de escucha
+    document.addEventListener('DOMContentLoaded', function () {
+        const salidaModal = document.getElementById('salidaRapidaModal');
+
+        // Verificamos que el modal realmente exista en esta página
+        if (salidaModal) {
+            salidaModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const itemId = button.getAttribute('data-item-id');
+                const itemNombre = button.getAttribute('data-item-nombre');
+                const itemStock = parseInt(button.getAttribute('data-item-stock'));
+
+                document.getElementById('modalItemNombre').textContent = itemNombre;
+                document.getElementById('modalItemStock').textContent = itemStock;
+
+                const form = document.getElementById('formSalidaRapida');
+                form.action = `/item/${itemId}/movimiento/`;
+
+                const inputCant = document.getElementById('modalInputCantidad');
+                const btnConfirmar = document.getElementById('btnConfirmarSalida');
+                const errorMsg = document.getElementById('modalError');
+
+                inputCant.value = '';
+                btnConfirmar.disabled = false;
+                errorMsg.classList.add('d-none');
+
+                inputCant.oninput = function () {
+                    const val = parseInt(this.value) || 0;
+                    if (val > itemStock) {
+                        btnConfirmar.disabled = true;
+                        errorMsg.classList.remove('d-none');
+                    } else {
+                        btnConfirmar.disabled = false;
+                        errorMsg.classList.add('d-none');
+                    }
+                };
+            });
+        }
+    });
+
+    document.getElementById('buscadorItems').addEventListener('keyup', function () {
+        const texto = this.value.toLowerCase();
+        const filas = document.querySelectorAll('table tbody tr');
+
+        filas.forEach(fila => {
+            // Buscamos dentro de la primera celda (Nombre y SKU)
+            const contenido = fila.cells[0].textContent.toLowerCase();
+            if (contenido.includes(texto)) {
+                fila.style.display = ''; // Mostrar
+            } else {
+                fila.style.display = 'none'; // Ocultar
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,171 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Detalle - {{ item.nombre }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'lista_inventario' %}">Inventario</a></li>
+                <li class="breadcrumb-item active">{{ item.nombre }}</li>
+            </ol>
+        </nav>
+        <h1 class="display-6">Gestión de Producto</h1>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{% url 'items_por_categoria' item.subcategoria.categoria.id %}?subcategoria={{ item.subcategoria.id }}" class="btn btn-outline-secondary">
+            ⬅ Volver a {{ item.subcategoria.nombre }}
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-primary text-white fw-bold">
+                {% if perms.core.change_item %} 📝 Editar Información {% else %} ℹ️ Información General {% endif %}
+            </div>
+            <div class="card-body bg-white">
+                {% if perms.core.change_item %}
+                    <form method="POST">
+    {% csrf_token %}
+
+    <div class="mb-3 p-3 bg-light rounded border">
+        <p class="mb-1 small text-muted text-uppercase fw-bold">Clasificación Actual</p>
+        <div class="d-flex align-items-center">
+            <span class="badge bg-secondary me-2">{{ item.subcategoria.categoria.nombre }}</span>
+            <span class="text-muted">/</span>
+            <span class="badge bg-dark ms-2">{{ item.subcategoria.nombre }}</span>
+        </div>
+        <small class="text-muted d-block mt-2">
+            * Para cambiar la categoría, contacte al administrador del sistema.
+        </small>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-bold small text-muted text-uppercase">Nombre del Producto</label>
+        {{ form.nombre }}
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold small text-muted text-uppercase">SKU</label>
+            {{ form.sku }}
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold small text-muted text-uppercase">Precio ($)</label>
+            {{ form.precio }}
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-bold small text-muted text-uppercase">Stock Actual</label>
+        {{ form.stock }}
+    </div>
+
+    <hr>
+    <button type="submit" class="btn btn-success w-100 shadow-sm">
+        💾 Guardar Cambios
+    </button>
+</form>
+                {% else %}
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item"><strong>SKU:</strong> <span class="float-end">{{ item.sku }}</span></div>
+                        <div class="list-group-item"><strong>Categoría:</strong> <span class="float-end">{{ item.subcategoria }}</span></div>
+                        <div class="list-group-item"><strong>Precio:</strong> <span class="float-end">${{ item.precio }}</span></div>
+                        <div class="list-group-item"><strong>Stock Actual:</strong> 
+                            <span class="float-end badge {% if item.stock <= 5 %}bg-danger{% else %}bg-success{% endif %}">
+                                {{ item.stock }}
+                            </span>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        {% if perms.core.view_transaccion %}
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-dark text-white fw-bold">
+                🕒 Historial de Movimientos Recientes
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Fecha y Hora</th>
+                                <th>Tipo</th>
+                                <th class="text-center">Cant.</th>
+                                <th class="text-center">Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in movimientos %}
+                            <tr>
+                                <td class="small">{{ m.fecha|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    {% if m.tipo == 'ENTRADA' %}
+                                        <span class="text-success">⬆️ Entrada</span>
+                                    {% elif m.tipo == 'SALIDA' %}
+                                        <span class="text-danger">⬇️ Salida</span>
+                                    {% else %}
+                                        <span class="text-warning text-dark">🔄 Ajuste</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center fw-bold {% if m.cantidad > 0 %}text-success{% else %}text-danger{% endif %}">
+                                    {{ m.cantidad }}
+                                </td>
+                                <td class="text-center">
+                                    <span class="text-muted small">{{ m.stock_previo }}</span> 
+                                    ➡️ <strong>{{ m.stock_nuevo }}</strong>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted">No hay movimientos registrados para este ítem.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-warning shadow-sm">
+            <h4 class="alert-heading">Acceso Restringido</h4>
+            <p>No tienes los permisos necesarios para visualizar el historial de auditoría de este producto.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    const selectCategoria = document.getElementById("id_categoria");
+    const selectSubcategoria = document.getElementById("id_subcategoria");
+
+    selectCategoria.addEventListener("change", function() {
+        const categoriaId = this.value;
+        const url = "{% url 'ajax_cargar_subcategorias' %}?categoria_id=" + categoriaId;
+
+        if (!categoriaId) {
+            selectSubcategoria.innerHTML = '<option value="">---------</option>';
+            return;
+        }
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                selectSubcategoria.innerHTML = '<option value="">---------</option>';
+                data.forEach(item => {
+                    let option = document.createElement("option");
+                    option.value = item.id;
+                    option.text = item.nombre;
+                    selectSubcategoria.add(option);
+                });
+            });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Inicio - Categorías{% endblock %}
+
+{% block content %}
+<div class="row mb-5 text-center">
+    <div class="col">
+        <h1 class="display-4 fw-bold text-dark">Panel de Inventario</h1>
+        <p class="lead text-muted">Seleccione una categoría para gestionar el stock y movimientos.</p>
+        <hr class="w-25 mx-auto">
+    </div>
+</div>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for cat in categorias %}
+    <div class="col">
+        <div class="card h-100 shadow-sm border-0 category-card transition">
+            <div class="card-body text-center p-5">
+                <div class="icon-box bg-primary bg-opacity-10 text-primary rounded-circle mb-4 mx-auto d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                    <span class="fs-1">📁</span>
+                </div>
+                
+                <h3 class="h4 fw-bold mb-2">{{ cat.nombre }}</h3>
+                
+                <p class="text-muted mb-4">
+                    {{ cat.subcategorias.count }} Subcategorías disponibles
+                </p>
+
+                <a href="{% url 'items_por_categoria' cat.id %}" class="btn btn-primary w-100 stretched-link">
+                    Ver Inventario
+                </a>
+            </div>
+            <div class="card-footer bg-transparent border-0 text-center pb-4">
+                <small class="text-uppercase fw-bold text-muted" style="letter-spacing: 1px;">Entrar</small>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center">
+        <div class="alert alert-light border shadow-sm p-5">
+            <span class="display-1 d-block mb-3">📂</span>
+            <h4>No hay categorías aún</h4>
+            <p class="text-muted">Empieza por crear una estructura de categorías en el panel de configuración.</p>
+            <a href="{% url 'gestionar_categorias' %}" class="btn btn-primary mt-3">Configurar Categorías</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+    .category-card {
+        transition: all 0.3s ease;
+    }
+    .category-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 1rem 3rem rgba(0,0,0,.1) !important;
+    }
+    .transition {
+        transition: transform .2s;
+    }
+</style>
+{% endblock %}

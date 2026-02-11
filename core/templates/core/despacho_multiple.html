@@ -1,0 +1,128 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"
+    rel="stylesheet" />
+
+<div class="container mt-4">
+    <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">📋 Despacho Múltiple de Insumos</h4>
+        </div>
+        <div class="card-body">
+            <form method="POST" id="form-despacho">
+                {% csrf_token %}
+                <table class="table" id="tabla-despacho">
+                    <thead>
+                        <tr>
+                            <th style="width: 60%;">Producto</th>
+                            <th style="width: 30%;">Cantidad</th>
+                            <th style="width: 10%;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="filas-contenedor">
+                    </tbody>
+                </table>
+
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="agregarFila()">
+                    ➕ Agregar Producto
+                </button>
+
+                <hr>
+                <div class="d-flex justify-content-end">
+                    <a href="{% url 'home_categorias' %}" class="btn btn-light me-2">Cancelar</a>
+                    <button type="submit" class="btn btn-success">Guardar Todos los Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    // Usamos jQuery de forma segura
+    $(document).ready(function () {
+
+        // Configuración para que Select2 busque por SKU de forma prioritaria
+        function inicializarSelect2(elemento) {
+            $(elemento).select2({
+                theme: 'bootstrap-5',
+                placeholder: 'Escanee código de barras o escriba nombre...',
+                width: '100%',
+                matcher: function (params, data) {
+                    // Si no hay búsqueda, retornar todos los datos
+                    if ($.trim(params.term) === '') { return data; }
+
+                    // Buscar por Nombre O por SKU (en el atributo data-sku)
+                    const term = params.term.toLowerCase();
+                    const text = data.text.toLowerCase();
+                    const sku = $(data.element).data('sku') ? $(data.element).data('sku').toString().toLowerCase() : '';
+
+                    if (text.indexOf(term) > -1 || sku.indexOf(term) > -1) {
+                        return data;
+                    }
+                    return null;
+                }
+            }).on('select2:select', function (e) {
+                // Al seleccionar un producto (vía escáner o clic), saltar a la cantidad
+                const filaActual = $(this).closest('tr');
+                filaActual.find('input[name="cantidad[]"]').focus();
+            });
+        }
+
+        // Modificamos agregarFila para que sea accesible globalmente o dentro del scope
+        window.agregarFila = function () {
+            const contenedor = document.getElementById('filas-contenedor');
+            const uniqueId = 'select-' + Date.now();
+
+            const nuevaFila = document.createElement('tr');
+            nuevaFila.innerHTML = `
+                <td>
+                    <select name="item_id[]" id="${uniqueId}" class="form-select select-producto" required>
+                        <option value="">Seleccione un producto...</option>
+                        {% for item in items %}
+                            <option value="{{ item.id }}" data-sku="{{ item.sku }}">
+                                [{{ item.sku }}] {{ item.nombre }} - Stock: {{ item.stock }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td>
+                    <input type="number" name="cantidad[]" class="form-control" min="1" required>
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="$(this).closest('tr').remove()">
+                        ✖
+                    </button>
+                </td>
+            `;
+            contenedor.appendChild(nuevaFila);
+
+            // Inicializamos el nuevo select
+            inicializarSelect2('#' + uniqueId);
+        };
+
+        // Agregar la primera fila automáticamente al cargar
+        agregarFila();
+
+        $(document).on('keydown', 'input, select', function (e) {
+            if (e.which == 13) { // Si presionan Enter
+                e.preventDefault(); // Evitamos que el formulario se envíe solo
+
+                const inputs = $(this).closest('form').find(':input:visible');
+                const index = inputs.index(this);
+
+                if ($(this).attr('name') === 'cantidad[]') {
+                    // Si terminamos de poner la cantidad, agregamos fila nueva para el siguiente ítem
+                    agregarFila();
+                } else {
+                    // Si no, solo pasamos al siguiente campo
+                    inputs.eq(index + 1).focus();
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-4">
+        <div class="card shadow border-0">
+            <div class="card-header bg-dark text-white fw-bold">{{ titulo }}</div>
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <div class="d-flex justify-content-between mt-3">
+                        <a href="{% url 'gestionar_categorias' %}" class="btn btn-light">Cancelar</a>
+                        <button type="submit" class="btn btn-primary">Actualizar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+<div class="container mt-5">
+    <h1>📜 Historial de Movimientos</h1>
+    <a href="{% url 'lista_inventario' %}" class="btn btn-secondary mb-3">Volver al Inventario</a>
+    
+    <table class="table table-striped card shadow">
+        <thead class="table-dark">
+            <tr>
+                <th>Fecha</th>
+                <th>Producto</th>
+                <th>Tipo</th>
+                <th>Cantidad</th>
+                <th>Stock Anterior</th>
+                <th>Stock Nuevo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for m in movimientos %}
+            <tr>
+                <td>{{ m.fecha|date:"d/m/Y H:i" }}</td>
+                <td>{{ m.item.nombre }}</td>
+                <td>
+                    <span class="badge {% if m.tipo == 'ENTRADA' %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                        {{ m.tipo }}
+                    </span>
+                </td>
+                <td>{{ m.cantidad }}</td>
+                <td>{{ m.stock_previo }}</td>
+                <td><strong>{{ m.stock_nuevo }}</strong></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

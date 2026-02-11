@@ -1,0 +1,40 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Nuevo Producto{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-success text-white">
+            <h4>➕ Registrar Nuevo Insumo</h4>
+        </div>
+        <div class="card-body">
+            {% if subcategoria_previa %}
+            <div class="alert alert-info">
+                Estás agregando un producto a: <strong>{{ subcategoria_previa.nombre }}</strong>
+            </div>
+            {% endif %}
+
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <hr>
+                <div class="d-flex justify-content-between">
+                    <a href="javascript:history.back()" class="btn btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Guardar Producto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Si usas Select2, esto hará que el selector se vea genial
+        $('select[name="subcategoria"]').select2({
+            theme: 'bootstrap-5',
+            width: '100%'
+        });
+    });
+</script>
+{% endblock %}

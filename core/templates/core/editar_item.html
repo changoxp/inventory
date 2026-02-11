@@ -1,0 +1,140 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Detalle - {{ item.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Detalle de Producto</h2>
+        <a href="{% url 'items_por_categoria' item.subcategoria.categoria.id %}" class="btn btn-outline-secondary">
+            ⬅ Volver a {{ item.subcategoria.categoria.nombre }}
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="row">
+                    <div class="col-md-4 text-center border-end">
+                        <label class="form-label fw-bold text-muted text-uppercase small">Imagen de Referencia</label>
+                        <div class="mb-3">
+                            {% if item.imagen %}
+                                <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal">
+                                    <img id="preview-img" src="{{ item.imagen.url }}" 
+                                        class="img-fluid rounded mb-2 shadow-sm" 
+                                        style="max-height: 250px; object-fit: cover; cursor: zoom-in;" 
+                                        title="Haga clic para ampliar">
+                                </a>
+                            {% else %}
+                                <div id="no-image-placeholder" class="bg-light rounded d-flex align-items-center justify-content-center mb-2 mx-auto" style="height: 200px; width: 100%; border: 2px dashed #dee2e6;">
+                                    <span class="text-muted">Sin imagen</span>
+                                </div>
+                                <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal">
+                                    <img id="preview-img" src="" class="img-fluid rounded mb-2 shadow-sm d-none" 
+                                        style="max-height: 250px; object-fit: cover; cursor: zoom-in;">
+                                </a>
+                            {% endif %}
+                            <div class="mt-2">
+                                {{ form.imagen }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-8 ps-md-4">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold small text-muted text-uppercase">Nombre</label>
+                                {{ form.nombre }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold small text-muted text-uppercase">SKU</label>
+                                {{ form.sku }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold small text-muted text-uppercase">Precio</label>
+                                {{ form.precio }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold small text-muted text-uppercase">Stock Actual</label>
+                                {{ form.stock }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold small text-muted text-uppercase text-danger">Stock Mínimo (Alerta)</label>
+                                {{ form.stock_minimo }}
+                                <div class="form-text" style="font-size: 0.75rem;">El semáforo cambiará a rojo cuando llegues a este número.</div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Descripción / Notas</label>
+                            {{ form.descripcion }}
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-success w-100 fw-bold">
+                                💾 Guardar todos los cambios
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <h4 class="mt-5 mb-3">Historial de Movimientos Recientes</h4>
+    <div class="card shadow-sm border-0">
+        <table class="table table-hover mb-0">
+            </table>
+    </div>
+</div>
+
+
+
+<script>
+    const imageInput = document.querySelector('input[type="file"]');
+    const previewImg = document.getElementById('preview-img');
+    const modalFullImg = document.getElementById('modal-full-img'); // Nuevo
+    const placeholder = document.getElementById('no-image-placeholder');
+
+    if (imageInput) {
+        imageInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const result = e.target.result;
+                    
+                    previewImg.src = result;
+                    previewImg.classList.remove('d-none');
+                    
+                    // Actualizamos también la imagen del modal
+                    if (modalFullImg) modalFullImg.src = result;
+                    
+                    if (placeholder) placeholder.classList.add('d-none');
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+</script>
+
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content bg-transparent border-0">
+            <div class="modal-header border-0">
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0 text-center">
+                <img id="modal-full-img" src="{% if item.imagen %}{{ item.imagen.url }}{% endif %}" 
+                     class="img-fluid rounded shadow-lg" style="max-height: 90vh;">
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

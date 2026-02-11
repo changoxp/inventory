@@ -1,0 +1,120 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Inventario - Lista General{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="display-5">Gestión de Inventario</h1>
+        <p class="text-muted">Visualiza, busca y gestiona el stock de tus productos.</p>
+    </div>
+    <div class="col-auto d-flex align-items-center">
+        <a href="{% url 'historial_movimientos' %}" class="btn btn-outline-secondary shadow-sm">
+            📜 Ver Historial Global
+        </a>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body bg-white rounded">
+        <form method="GET" class="row g-2">
+            <div class="col-md-10">
+                <input type="text" name="buscar" class="form-control" 
+                       placeholder="Buscar por nombre o SKU..." value="{{ busqueda|default:'' }}">
+            </div>
+            <div class="col-md-2 d-grid">
+                <button class="btn btn-primary" type="submit">🔍 Buscar</button>
+            </div>
+            {% if busqueda %}
+            <div class="col-12 text-end">
+                <a href="{% url 'lista_inventario' %}" class="text-decoration-none text-muted small">
+                    ✕ Limpiar filtros
+                </a>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+<div class="row mb-3">
+    <div class="col text-end">
+        <a href="{% url 'crear_item' %}" class="btn btn-success shadow-sm">
+            ➕ Nuevo Producto
+        </a>
+    </div>
+</div>
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-4">SKU</th>
+                    <th>Producto</th>
+                    <th>Categoría > Sub</th>
+                    <th>Stock</th>
+                    <th class="text-end pe-4">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td class="ps-4"><code class="fw-bold">{{ item.sku }}</code></td>
+                    <td><strong>{{ item.nombre }}</strong></td>
+                    <td>
+                        <span class="badge bg-light text-dark border">
+                            {{ item.subcategoria }}
+                        </span>
+                    </td>
+                    <td class="fw-bold">
+                        
+                        {% if item.stock <= 0 %}
+                            <span class="badge bg-dark">Agotado</span>
+
+                        {% elif item.stock > item.stock_minimo %}
+                            <span class="badge bg-success">Saludable ({{ item.stock }})</span>
+
+                        {% elif item.stock == item.stock_minimo %}
+                            <span class="badge bg-warning text-dark">Límite ({{ item.stock }})</span>
+
+                        {% else %}
+                            <span class="badge bg-danger">Crítico ({{ item.stock }})</span>
+                            
+                        {% endif %}
+                    </td>
+                    <td class="text-end pe-4">
+                        <div class="btn-group shadow-sm" role="group">
+                            <a href="{% url 'detalle_item' item.id %}" class="btn btn-outline-info btn-sm">
+                                👁️ Detalle
+                            </a>
+                            {% if item.stock > 0 %}
+                            <a href="{% url 'salida_rapida' item.id %}" class="btn btn-outline-danger btn-sm" 
+                               onclick="return confirm('¿Registrar salida de 1 unidad?')">
+                                −1 Salida
+                            </a>
+                            {% else %}
+                            <button class="btn btn-outline-secondary btn-sm" disabled>Agotado</button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-5">
+                        <p class="text-muted mb-0">No se encontraron productos en el inventario.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+{% endblock %}
+
+<script>
+                        // Este script se ejecutará por cada fila para decirnos qué pasa
+                        console.log("--- Debug Stock: {{ item.nombre }} ---");
+                        console.log("Stock Real:", Number("{{ item.stock }}"));
+                        console.log("Mínimo Configurado:", Number("{{ item.stock_minimo }}"));
+                        console.log("¿Es Stock > Mínimo?:", Number("{{ item.stock }}") > Number("{{ item.stock_minimo }}"));
+                    </script>
