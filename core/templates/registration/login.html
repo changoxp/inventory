@@ -4,9 +4,9 @@
     <div class="card shadow-lg border-0" style="max-width: 400px; width: 100%; border-radius: 15px;">
         <div class="card-body p-5">
             <div class="text-center mb-4">
-                <img src="{% static 'core/img/logo.png' %}" alt="Logo Clínica" style="max-height: 100px;">
-                <h3 class="mt-3 fw-bold text-primary">Acceso al Sistema</h3>
-                <p class="text-muted small">Inventario y Gestión Clínica</p>
+                <img src="{% static 'core/img/logo.png' %}" alt="natuvu logo" style="max-height: 100px;">
+                <h4 class="mt-3 fw-bold" style="color: #012768;">Log in</h4>
+                <p class="text-muted small">Sign In to Your Account</p>
             </div>
 
             <form method="post">
@@ -14,35 +14,35 @@
 
                 {% if form.errors %}
                 <div class="alert alert-danger p-2 small">
-                    Usuario o contraseña incorrectos.
+                    Wrong username or password.
                 </div>
                 {% endif %}
 
                 <div class="mb-3">
-                    <label class="form-label small fw-bold">Usuario</label>
+                    <label class="form-label small fw-bold">user</label>
                     <div class="input-group">
                         <span class="input-group-text bg-light border-end-0"><i class="bi bi-person"></i></span>
                         <input type="text" name="username" class="form-control border-start-0 bg-light"
-                            placeholder="Ej: admin_quirfano" required>
+                            placeholder="your username" required>
                     </div>
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label small fw-bold">Contraseña</label>
+                    <label class="form-label small fw-bold">password</label>
                     <div class="input-group">
                         <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock"></i></span>
                         <input type="password" name="password" id="passwordInput"
-                            class="form-control border-start-0 bg-light" placeholder="••••••••" required>
+                            class="form-control border-start-0 bg-light" placeholder="your password" required>
 
-                        <button class="btn btn-outline-secondary border-start-0 bg-light" type="button"
+                        <button class="btn btn-outline-secondary" type="button"
                             id="togglePassword">
                             <i class="bi bi-eye" id="eyeIcon"></i>
                         </button>
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100 py-2 shadow-sm" style="border-radius: 8px;">
-                    Iniciar Sesión
+                <button type="submit" class="btn btn-primary w-100 py-2 shadow-sm" style="border-radius: 8px; background-color: #012768;">
+                    let me in!
                 </button>
             </form>
         </div>
