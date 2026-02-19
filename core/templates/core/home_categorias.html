@@ -5,8 +5,8 @@
 {% block content %}
 <div class="row mb-5 text-center">
     <div class="col">
-        <h1 class="display-4 fw-bold text-dark">Panel de Inventario</h1>
-        <p class="lead text-muted">Seleccione una categoría para gestionar el stock y movimientos.</p>
+        <h1 class="display-4 fw-bold text-dark">Inventory</h1>
+        <p class="lead text-muted">Select a category to view stock and manage items.</p>
         <hr class="w-25 mx-auto">
     </div>
 </div>
@@ -23,15 +23,15 @@
                 <h3 class="h4 fw-bold mb-2">{{ cat.nombre }}</h3>
                 
                 <p class="text-muted mb-4">
-                    {{ cat.subcategorias.count }} Subcategorías disponibles
+                    {{ cat.subcategorias.count }} subcategories availables
                 </p>
 
                 <a href="{% url 'items_por_categoria' cat.id %}" class="btn btn-primary w-100 stretched-link">
-                    Ver Inventario
+                    View inventory
                 </a>
             </div>
             <div class="card-footer bg-transparent border-0 text-center pb-4">
-                <small class="text-uppercase fw-bold text-muted" style="letter-spacing: 1px;">Entrar</small>
+                <small class="fw-bold text-muted" style="letter-spacing: 1px;">Go</small>
             </div>
         </div>
     </div>
@@ -39,9 +39,9 @@
     <div class="col-12 text-center">
         <div class="alert alert-light border shadow-sm p-5">
             <span class="display-1 d-block mb-3">📂</span>
-            <h4>No hay categorías aún</h4>
-            <p class="text-muted">Empieza por crear una estructura de categorías en el panel de configuración.</p>
-            <a href="{% url 'gestionar_categorias' %}" class="btn btn-primary mt-3">Configurar Categorías</a>
+            <h4>There is no categories yet</h4>
+            <p class="text-muted">Star creating categories from the administration menu.</p>
+            <a href="{% url 'gestionar_categorias' %}" class="btn btn-primary mt-3">Configure categories</a>
         </div>
     </div>
     {% endfor %}

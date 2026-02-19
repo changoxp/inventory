@@ -10,6 +10,8 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import render
 import openpyxl
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment, PatternFill
 from django.http import HttpResponse
 from .models import Item, Categoria, Subcategoria
 
@@ -437,4 +439,54 @@ def exportar_inventario_excel(request):
     wb.save(response)
     return response
 
+@login_required
+def exportar_subcategoria_excel(request, subcategoria_id):
+    # 1. Obtener los datos
+    subcategoria = Subcategoria.objects.get(pk=subcategoria_id)
+    items = Item.objects.filter(subcategoria=subcategoria)
 
+    # 2. Crear el libro de Excel
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Inventario"
+
+    # 3. Estilo para el encabezado
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="012768", end_color="012768", fill_type="solid") # Tu azul corporativo
+    
+    # Definir títulos de columnas
+    columns = ['Nombre del Insumo', 'Stock Actual', 'Unidad', 'Última Actualización']
+    ws.append(columns)
+
+    # Aplicar estilos a los encabezados
+    for cell in ws[1]:
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = Alignment(horizontal="center")
+
+    # 4. Cargar los datos de los ítems
+    for item in items:
+        ws.append([
+            item.nombre,
+            item.stock,
+        ])
+
+    # 5. Ajustar ancho de columnas automáticamente
+    for col in ws.columns:
+        max_length = 0
+        column = col[0].column_letter
+        for cell in col:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(cell.value)
+            except: pass
+        ws.column_dimensions[column].width = max_length + 5
+
+    # 6. Preparar la respuesta HTTP
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    )
+    response['Content-Disposition'] = f'attachment; filename="Inventario_{subcategoria.nombre}.xlsx"'
+    
+    wb.save(response)
+    return response

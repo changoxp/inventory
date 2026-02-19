@@ -3,8 +3,8 @@
 {% block content %}
 <div class="container mt-5">
     <div class="text-center mb-5">
-        <h1 class="display-4">Sistema de Inventario Clínico</h1>
-        <p class="lead text-muted">Gestión centralizada de insumos y equipamiento</p>
+        <h1 class="display-4">Inventory helper</h1>
+        <p class="lead text-muted">Supplies and equipement</p>
     </div>
 
     <div class="row g-4">
@@ -14,9 +14,9 @@
                     <div class="display-4 text-primary mb-3">
                         <i class="bi bi-box-seam"></i>
                     </div>
-                    <h4 class="card-title">Inventario</h4>
-                    <p class="card-text text-muted">Explorar categorías, subcategorías y gestionar el stock actual.</p>
-                    <a href="{% url 'home_categorias' %}" class="btn btn-primary w-100">Ir a Inventario</a>
+                    <h4 class="card-title">Inventory</h4>
+                    <p class="card-text text-muted">Explore categories, subcategories and stock.</p>
+                    <a href="{% url 'home_categorias' %}" class="btn btn-primary w-100">Go to inventory</a>
                 </div>
             </div>
         </div>
@@ -27,9 +27,9 @@
                     <div class="display-4 text-success mb-3">
                         <i class="bi bi-file-earmark-pdf"></i>
                     </div>
-                    <h4 class="card-title">Reportes</h4>
-                    <p class="card-text text-muted">Generar listados en PDF y auditorías de existencias por sección.</p>
-                    <a href="{% url 'panel_reportes' %}" class="btn btn-success w-100">Centro de Reportes</a>
+                    <h4 class="card-title">Reports</h4>
+                    <p class="card-text text-muted">Pdf and Excel formats downloadable files.</p>
+                    <a href="{% url 'panel_reportes' %}" class="btn btn-success w-100">Reports center</a>
                 </div>
             </div>
         </div>
@@ -40,9 +40,9 @@
                     <div class="display-4 text-secondary mb-3">
                         <i class="bi bi-gear"></i>
                     </div>
-                    <h4 class="card-title">Configuración</h4>
-                    <p class="card-text text-muted">Administrar nombres de categorías y organizar la estructura del sistema.</p>
-                    <a href="{% url 'admin:core_categoria_changelist' %}" class="btn btn-secondary w-100">Configurar Categorías</a>
+                    <h4 class="card-title">Configuration</h4>
+                    <p class="card-text text-muted">System organization.</p>
+                    <a href="{% url 'gestionar_categorias' %}" class="btn btn-secondary w-100">Configure categories and subcategories</a>
                 </div>
             </div>
         </div>

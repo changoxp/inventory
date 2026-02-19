@@ -2,7 +2,14 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-4">📋 Centro de Reportes e Inventario</h2>
+    <h4 class="mb-4">📋 Reports by category</h4>
+
+    <div class="d-flex justify-content-end">
+        <a href="{% url 'pagina_exportar' %}" class="btn btn-success mb-3">
+            <i class="bi bi-file-earmark-excel"></i> Excel report
+        </a>
+    </div>
+
     <div class="row">
         {% for cat in categorias %}
         <div class="col-md-6 mb-4">
@@ -13,15 +20,30 @@
                 <div class="card-body">
                     <ul class="list-group list-group-flush">
                         {% for sub in cat.subcategorias.all %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            {{ sub.nombre }}
-                            <a href="{% url 'reporte_subcategoria' sub.id %}" target="_blank"
-                                class="btn btn-outline-primary btn-sm">
-                                Ver Reporte PDF
-                            </a>
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                            <div>
+                                <i class="bi bi-arrow-return-right text-muted me-2"></i>
+                                <span class="fw-medium text-dark">{{ sub.nombre }}</span>
+                            </div>
+
+                            <div class="btn-group shadow-sm" role="group" aria-label="Acciones de reporte">
+                                <a href="{% url 'reporte_subcategoria' sub.id %}" target="_blank"
+                                    class="btn btn-outline-danger btn-sm d-flex align-items-center"
+                                    title="Download as a PDF">
+                                    <i class="bi bi-file-earmark-pdf me-1"></i> PDF
+                                </a>
+
+                                <a href="{% url 'exportar_excel_sub' sub.id %}" target="_blank"
+                                    class="btn btn-sm d-flex align-items-center text-white"
+                                    style="background-color: #012768;" title="Excel file dowload">
+                                    <i class="bi bi-file-earmark-excel me-1"></i> Excel
+                                </a>
+                            </div>
                         </li>
                         {% empty %}
-                        <li class="list-group-item text-muted italic">No hay subcategorías registradas</li>
+                        <li class="list-group-item text-muted fst-italic py-3">
+                            <i class="bi bi-info-circle me-2"></i>No hay subcategorías registradas aquí.
+                        </li>
                         {% endfor %}
                     </ul>
                 </div>

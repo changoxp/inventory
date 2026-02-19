@@ -30,7 +30,8 @@ urlpatterns = [
     path('despacho-multiple/', views.despacho_multiple, name='despacho_multiple'),
     path('categoria/<int:subcategoria_id>/', views.items_por_categoria, name='items_por_categoria'),
     path('reporte/subcategoria/<int:sub_id>/', views.reporte_subcategoria, name='reporte_subcategoria'),
-    # Reportes
+    # Reports
+    # Used
     path('reportes/', views.panel_reportes, name='panel_reportes'),
     path('reportes/generar/<int:sub_id>/', views.reporte_subcategoria, name='reporte_subcategoria'),
     # Ruta general (carga la primera subcategoría por defecto)
@@ -41,4 +42,5 @@ urlpatterns = [
     
     path('exportar/', views.pagina_exportar_filtros, name='pagina_exportar'),
     path('exportar/excel/', views.exportar_inventario_excel, name='exportar_excel'),
+    path('exportar/excel/<int:subcategoria_id>/', views.exportar_subcategoria_excel, name='exportar_excel_sub'),
 ]
