@@ -24,3 +24,4 @@ if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     
 handler403 = 'core.views.error_403'
+handler404 = 'core.views.error_404'

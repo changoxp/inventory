@@ -1,6 +1,6 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Restricted access{% endblock %}
+{% block title %}Page not found{% endblock %}
 
 {% block content %}
 <div class="container d-flex flex-column align-items-center justify-content-center" style="min-height: 70vh;">
@@ -8,14 +8,14 @@
     <div class="mb-4">
         <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
              style="width: 120px; height: 120px; background-color: #f8f9fa; border: 2px solid #012768;">
-            <i class="bi bi-shield-lock" style="font-size: 4rem; color: #012768;"></i>
+            <i class="bi bi-search-heart" style="font-size: 4rem; color: #012768;"></i>
         </div>
     </div>
 
     <div class="text-center">
-        <h3 class="fw-bold mb-2" style="color: #012768;">Restricted area</h3>
+        <h3 class="fw-bold mb-2" style="color: #012768;">Page not found</h3>
         <p class="text-muted mb-4 mx-auto" style="max-width: 500px;">
-            Ups... Your actual profile does not have credentials to access to this section.
+            We really sorry...The resource you are looking does not exist or has been moved.
         </p>
         
         <hr class="mb-4 mx-auto" style="width: 100px; border-top: 3px solid #012768; opacity: 1;">
@@ -23,17 +23,17 @@
         <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
             <a href="{% url 'dashboard' %}" class="btn btn-lg px-4 shadow-sm text-white" 
                style="background-color: #012768;">
-               <i class="bi bi-house-door me-2"></i>Take me home
+               <i class="bi bi-arrow-left-circle me-2"></i>Take me home
             </a>
-            <button onclick="history.back()" class="btn btn-lg btn-outline-secondary px-4">
-                <i class="bi bi-arrow-left me-2"></i>Go back
-            </button>
+            <a href="{% url 'home_categorias' %}" class="btn btn-lg btn-outline-secondary px-4">
+                <i class="bi bi-box-seam me-2"></i>Go to inventory
+            </a>
         </div>
     </div>
 
     <div class="mt-5 pt-4 text-muted small">
-        <p>If you consider this is an error, please contact us.</p>
-        <code class="p-1 bg-light rounded text-uppercase" style="font-size: 0.75rem;">Error Code: 403 Forbidden</code>
+        <p>Something is missing? Please contact us.</p>
+        <code class="p-1 bg-light rounded text-uppercase" style="font-size: 0.75rem;">Error Code: 404 Not Found</code>
     </div>
 </div>
 {% endblock %}

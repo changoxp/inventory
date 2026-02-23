@@ -25,6 +25,9 @@ def error_403(request, exception=None): # El '=None' es vital
         from django.http import HttpResponse
         return HttpResponse("Error en el template 403", status=403)
 
+def error_404(request, exception):
+    return render(request, 'core/404.html', status=404)
+
 # Create your views here.
 @login_required
 def lista_inventario(request):
@@ -84,12 +87,19 @@ class CategoriaForm(forms.ModelForm):
     class Meta:
         model = Categoria
         fields = ['nombre']
-        widgets = {'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej. Electrónica'})}
+        labels = {
+            'nombre': 'Category name'
+        }
+        widgets = {'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej. Lab'})}
 
 class SubcategoriaForm(forms.ModelForm):
     class Meta:
         model = Subcategoria
         fields = ['categoria', 'nombre']
+        labels = {
+            'categoria':'Category',
+            'nombre': 'Subcategory name'
+        }
         widgets = {
             'categoria': forms.Select(attrs={'class': 'form-select'}),
             'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej. Laptops'})
@@ -388,38 +398,49 @@ def pagina_exportar_filtros(request):
 
 @login_required
 def exportar_inventario_excel(request):
-    
+    # 1. Obtener parámetros de los filtros
     categoria_id = request.GET.get('categoria')
     subcategoria_id = request.GET.get('subcategoria')
 
+    # 2. Empezar con todos los items (QuerySet base)
     items = Item.objects.all().select_related('subcategoria__categoria')
 
-    # Aplicar filtros si no se eligió "Todas"
+    # 3. Aplicar filtros dinámicamente
     if categoria_id and categoria_id != 'todas':
         items = items.filter(subcategoria__categoria_id=categoria_id)
     
     if subcategoria_id and subcategoria_id != 'todas':
         items = items.filter(subcategoria_id=subcategoria_id)
-        
-    # Crear el libro y la hoja
+
+    # --- AQUÍ ESTABA EL ERROR: No vuelvas a llamar a Item.objects.all() ---
+
+    # 4. Crear el libro y la hoja
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = "Inventario Clínica"
+
+    # 5. Estilo de encabezado (opcional, para que combine con tu azul #012768)
+    from openpyxl.styles import Font, PatternFill
+    header_fill = PatternFill(start_color="012768", end_color="012768", fill_type="solid")
+    header_font = Font(bold=True, color="FFFFFF")
 
     # Definir el encabezado
     columns = ['Nombre', 'Categoría', 'Subcategoría', 'Stock Actual', 'Stock Mínimo', 'Estado']
     ws.append(columns)
 
-    # Obtener los datos (puedes usar select_related para que sea más rápido)
-    items = Item.objects.all().select_related('subcategoria__categoria')
+    # Aplicar estilo al encabezado
+    for cell in ws[1]:
+        cell.fill = header_fill
+        cell.font = header_font
 
+    # 6. Escribir los datos (usando el QuerySet ya filtrado)
     for item in items:
-        # Lógica simple para el estado (puedes replicar la que usas en el HTML)
+        # Lógica para el estado
         estado = "OK"
         if item.stock <= 0:
             estado = "AGOTADO"
         elif item.stock <= item.stock_minimo:
-            estado = "BAJO"
+            estado = "CRÍTICO"
 
         ws.append([
             item.nombre,
@@ -430,11 +451,22 @@ def exportar_inventario_excel(request):
             estado
         ])
 
-    # Preparar la respuesta del navegador
+    # 7. Ajustar el ancho de las columnas automáticamente
+    for col in ws.columns:
+        max_length = 0
+        column = col[0].column_letter
+        for cell in col:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except: pass
+        ws.column_dimensions[column].width = max_length + 2
+
+    # 8. Preparar la respuesta del navegador
     response = HttpResponse(
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     )
-    response['Content-Disposition'] = 'attachment; filename="inventario_clinica.xlsx"'
+    response['Content-Disposition'] = 'attachment; filename="inventario_clinica_filtrado.xlsx"'
     
     wb.save(response)
     return response

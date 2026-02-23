@@ -1,6 +1,6 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Inventario - {{ categoria.nombre }}{% endblock %}
+{% block title %}Inventory - {{ categoria.nombre }}{% endblock %}
 
 {% block content %}
 <div class="row mb-4 align-items-center">
@@ -8,50 +8,43 @@
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-1">
                 <li class="breadcrumb-item"><a href="{% url 'home_categorias' %}"
-                        class="text-decoration-none">Inicio</a></li>
+                        class="text-decoration-none">Home</a></li>
                 <li class="breadcrumb-item active">{{ categoria.nombre }}</li>
             </ol>
         </nav>
-        <h2 class="fw-bold">Categoría: {{ categoria.nombre }}</h2>
+        <h2 class="fw-bold text-dark"><i class="bi bi-folder2-open text-primary me-2"></i>{{ categoria.nombre }}</h2>
     </div>
-    <div class="col-md-4 text-end">
-        <a href="{% url 'crear_item_subcategoria' subcategoria_activa.id %}" class="btn btn-success">
-            ➕ Agregar producto aquí
+    <div class="col-md-4 text-md-end text-start mt-3 mt-md-0">
+        <a href="{% url 'crear_item_subcategoria' subcategoria_activa.id %}" class="btn btn-success shadow-sm">
+            <i class="bi bi-plus-circle me-1"></i> Add new item
         </a>
     </div>
 </div>
 
-<div class="d-flex justify-content-between mb-3">
-    <h3>{{ subcategoria.nombre }}</h3>
-    {% if items %}
-    <a href="{% url 'reporte_subcategoria' items.0.subcategoria.id %}" target="_blank" class="btn btn-outline-dark">
-        📋 Generar Reporte PDF
-    </a>
-    {% else %}
-    <p class="text-muted">No hay ítems para generar reporte en esta categoría.</p>
-    {% endif %}
-</div>
-
-<div class="mb-3">
-    <div class="input-group shadow-sm">
-        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search">🔍</i></span>
-        <input type="text" id="buscadorItems" class="form-control border-start-0"
-            placeholder="Buscar por nombre o SKU...">
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-2">
+        <div class="input-group">
+            <span class="input-group-text bg-white border-0"><i class="bi bi-search text-muted"></i></span>
+            <input type="text" id="buscadorItems" class="form-control border-0 shadow-none"
+                placeholder="Buscar por nombre, SKU o descripción...">
+        </div>
     </div>
 </div>
 
 <div class="row">
     <div class="col-lg-3 mb-4">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-dark text-white fw-bold">
-                📁 Subcategorías
+        <div class="card border-0 shadow-sm overflow-hidden">
+            <div class="card-header text-white fw-bold py-3" style="background-color: #012768;">
+                <i class="bi bi-filter-left me-2"></i>Subcategories
             </div>
-            <div class="list-group">
-                <h5 class="mb-3">Subcategorías de {{ categoria.nombre }}</h5>
+            <div class="list-group list-group-flush">
                 {% for sub in subcategorias %}
                 <a href="{% url 'items_por_subcategoria' categoria.id sub.id %}"
-                    class="list-group-item list-group-item-action {% if sub.id == subcategoria_activa.id %}active{% endif %}">
+                    class="list-group-item list-group-item-action border-0 d-flex justify-content-between align-items-center py-3 {% if sub.id == subcategoria_activa.id %}active-sub{% endif %}">
                     {{ sub.nombre }}
+                    {% if sub.id == subcategoria_activa.id %}
+                    <i class="bi bi-chevron-right"></i>
+                    {% endif %}
                 </a>
                 {% endfor %}
             </div>
@@ -63,63 +56,56 @@
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
-                        <tr>
-                            <th class="ps-4">SKU / Nombre</th>
-                            <th>Subcategoría</th>
+                        <tr class="text-muted small">
+                            <th class="ps-4 py-3">Item name / SKU</th>
                             <th>Stock</th>
-                            <th>Precio</th>
-                            <th class="text-end pe-4">Acción</th>
+                            <th class="text-end pe-4">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for item in items %}
                         <tr>
                             <td class="ps-4">
-                                <span class="d-block fw-bold text-dark">{{ item.nombre }}</span>
-                                <small class="text-muted font-monospace">{{ item.sku }}</small>
+                                <div class="fw-bold text-dark">{{ item.nombre }}</div>
+                                <div class="text-muted x-small font-monospace">{{ item.sku }}</div>
                             </td>
                             <td>
-                                <span class="badge bg-light text-dark border">{{ item.subcategoria.nombre }}</span>
-                            </td>
-                            <td class="fw-bold">
-                                {% if item.stock <= 0 %} <span class="badge bg-dark">Agotado</span>
-
+                                {% if item.stock <= 0 %} <span class="badge rounded-pill bg-dark px-3">Agotado</span>
                                     {% elif item.stock > item.stock_minimo %}
-                                    <span class="badge bg-success">Saludable ({{ item.stock }})</span>
-
+                                    <span class="badge rounded-pill bg-success px-3">Ok ({{ item.stock }})</span>
                                     {% elif item.stock == item.stock_minimo %}
-                                    <span class="badge bg-warning text-dark">Límite ({{ item.stock }})</span>
-
+                                    <span class="badge rounded-pill bg-warning text-dark px-3">Low ({{ item.stock}})</span>
                                     {% else %}
-                                    <span class="badge bg-danger">Crítico ({{ item.stock }})</span>
-
+                                    <span class="badge rounded-pill bg-danger px-3">Critical({{ item.stock }})</span>
                                     {% endif %}
                             </td>
-                            <td>${{ item.precio }}</td>
                             <td class="text-end pe-4">
-                                <a href="{% url 'detalle_item' item.id %}" class="btn btn-sm btn-info">Ver Ficha</a>
-                            </td>
-                            <td class="text-end pe-4">
-                                <button type="button" class="btn btn-sm btn-outline-danger me-1" data-bs-toggle="modal"
-                                    data-bs-target="#salidaRapidaModal" data-item-id="{{ item.id }}"
-                                    data-item-nombre="{{ item.nombre }}" data-item-stock="{{ item.stock }}">
-                                    ➖ Salida
-                                </button>
-
-                                {% load auth_extras %}<div class="btn-group">
-                                    <a href="{% url 'detalle_item' item.id %}" class="btn btn-sm btn-info">👁️ Ver</a>
-
+                                <div class="btn-group shadow-sm">
+                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                                        data-bs-target="#salidaRapidaModal" data-item-id="{{ item.id }}"
+                                        data-item-nombre="{{ item.nombre }}" data-item-stock="{{ item.stock }}"
+                                        title="Express checkout">
+                                        <i class="bi bi-dash-circle"></i>
+                                    </button>
+                                    <a href="{% url 'detalle_item' item.id %}" class="btn btn-sm btn-outline-primary"
+                                        title="View Item">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    {% load auth_extras %}
                                     {% if request.user|has_group:"Administrador" or request.user.is_superuser %}
-                                    <a href="{% url 'editar_item' item.id %}" class="btn btn-sm btn-warning">✏️
-                                        Editar</a>
+                                    <a href="{% url 'editar_item' item.id %}" class="btn btn-sm btn-outline-secondary"
+                                        title="Edit item info">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
                                     {% endif %}
                                 </div>
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="5" class="text-center py-5 text-muted">
-                                <p class="mb-0">No se encontraron productos en esta selección.</p>
+                            <td colspan="4" class="text-center py-5">
+                                <i class="bi bi-box-seam text-muted display-4 d-block mb-3"></i>
+                                <p class="text-muted">No item in this subcategory.</p>
                             </td>
                         </tr>
                         {% endfor %}
@@ -130,31 +116,43 @@
     </div>
 </div>
 
+<style>
+    .active-sub {
+        background-color: #f8f9fa !important;
+        color: #012768 !important;
+        font-weight: bold;
+        border-left: 4px solid #012768 !important;
+    }
+
+    .x-small {
+        font-size: 0.75rem;
+    }
+</style>
 
 <div class="modal fade" id="salidaRapidaModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-sm modal-dialog-centered">
-        <div class="modal-content">
+        <div class="modal-content border-0 shadow">
             <form id="formSalidaRapida" method="POST" action="">
                 {% csrf_token %}
-                <div class="modal-header bg-danger text-white py-2">
-                    <h6 class="modal-title">Salida: <span id="modalItemNombre"></span></h6>
+                <div class="modal-header text-white py-2 border-0" style="background-color: #dc3545;">
+                    <h6 class="modal-title">Express checkout</h6>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="text-center mb-3">
-                        <small class="text-muted d-block">Stock disponible: <strong
-                                id="modalItemStock"></strong></small>
-                    </div>
+                <div class="modal-body text-center">
+                    <p class="mb-1 fw-bold text-dark" id="modalItemNombre"></p>
+                    <small class="text-muted d-block mb-3">Stock: <span id="modalItemStock"></span></small>
+
                     <input type="hidden" name="tipo" value="SALIDA">
-                    <div class="form-group">
-                        <label class="small fw-bold">Cantidad a retirar:</label>
-                        <input type="number" name="cantidad" id="modalInputCantidad" class="form-control" min="1"
-                            required>
-                        <div id="modalError" class="text-danger small mt-1 d-none">Stock insuficiente</div>
+                    <div class="form-group text-start">
+                        <label class="small fw-bold mb-1">Stock to checkout:</label>
+                        <input type="number" name="cantidad" id="modalInputCantidad"
+                            class="form-control form-control-lg text-center" min="1" required>
+                        <div id="modalError" class="text-danger small mt-2 d-none fw-bold"><i
+                                class="bi bi-exclamation-triangle"></i> Insufficient stock</div>
                     </div>
                 </div>
-                <div class="modal-footer border-0">
-                    <button type="submit" id="btnConfirmarSalida" class="btn btn-danger w-100">Confirmar Salida</button>
+                <div class="modal-footer border-0 p-3">
+                    <button type="submit" id="btnConfirmarSalida" class="btn btn-danger w-100 py-2 fw-bold">Save checkout</button>
                 </div>
             </form>
         </div>
@@ -162,11 +160,8 @@
 </div>
 
 <script>
-    // Envolvemos todo en este evento de escucha
     document.addEventListener('DOMContentLoaded', function () {
         const salidaModal = document.getElementById('salidaRapidaModal');
-
-        // Verificamos que el modal realmente exista en esta página
         if (salidaModal) {
             salidaModal.addEventListener('show.bs.modal', function (event) {
                 const button = event.relatedTarget;
@@ -176,7 +171,6 @@
 
                 document.getElementById('modalItemNombre').textContent = itemNombre;
                 document.getElementById('modalItemStock').textContent = itemStock;
-
                 const form = document.getElementById('formSalidaRapida');
                 form.action = `/item/${itemId}/movimiento/`;
 
@@ -205,15 +199,9 @@
     document.getElementById('buscadorItems').addEventListener('keyup', function () {
         const texto = this.value.toLowerCase();
         const filas = document.querySelectorAll('table tbody tr');
-
         filas.forEach(fila => {
-            // Buscamos dentro de la primera celda (Nombre y SKU)
             const contenido = fila.cells[0].textContent.toLowerCase();
-            if (contenido.includes(texto)) {
-                fila.style.display = ''; // Mostrar
-            } else {
-                fila.style.display = 'none'; // Ocultar
-            }
+            fila.style.display = contenido.includes(texto) ? '' : 'none';
         });
     });
 </script>
