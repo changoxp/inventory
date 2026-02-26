@@ -74,6 +74,12 @@ class ItemForm(forms.ModelForm):
     class Meta:
         model = Item
         fields = ['nombre', 'sku', 'stock', 'stock_minimo', 'descripcion', 'imagen'] # Agregados aquí
+        labels = {
+            'nombre': 'Item name',
+            'stock_minimo': 'minimum stock',
+            'descripcion': 'description',
+            'imagen': 'image'
+        }
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'form-control'}),
             'sku': forms.TextInput(attrs={'class': 'form-control'}),
@@ -105,29 +111,7 @@ class SubcategoriaForm(forms.ModelForm):
             'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej. Laptops'})
         }
         
-#Editar Item #1
 
-"""
-@login_required
-def detalle_item(request, item_id):
-    item = get_object_or_404(Item, id=item_id)
-    # Obtenemos solo las transacciones de ESTE ítem
-    movimientos = item.transacciones.all().order_by('-fecha')
-    
-    if request.method == 'POST':
-        form = ItemForm(request.POST, request.FILES, instance=item)
-        if form.is_valid():
-            form.save()
-            return redirect('detalle_item', item_id=item.id)
-    else:
-        form = ItemForm(instance=item)
-    
-    return render(request, 'core/detalle_item.html', {
-        'item': item,
-        'form': form,
-        'movimientos': movimientos
-    })
-"""
 # Función de ayuda para verificar si es admin
 def is_editor(user):
     if user.groups.filter(name='editor').exists() or user.is_superuser:
