@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models.signals import pre_save # Usamos pre_save para capturar el stock anterior
 from django.dispatch import receiver
+from PIL import Image
 import os, uuid
 
 # Create your models here.
@@ -37,6 +38,25 @@ class Item(models.Model):
     stock_minimo = models.PositiveIntegerField(default=0)
     descripcion = models.TextField(blank=True, null=True, verbose_name="Descripción")
     imagen = models.ImageField(upload_to=path_imagen_item, blank=True, null=True, verbose_name="Referential img")
+
+    def save(self, *args, **kwargs):
+        # 1. Guardamos el registro primero para que se cree el archivo en el disco
+        super().save(*args, **kwargs)
+
+        # 2. Si hay una imagen, procedemos a optimizarla
+        if self.imagen:
+            img_path = self.imagen.path
+            img = Image.open(img_path)
+
+            # Si es muy grande (ej: más de 800px de ancho o alto)
+            if img.height > 800 or img.width > 800:
+                output_size = (800, 800)
+                # thumbnail mantiene la relación de aspecto (no deforma la imagen)
+                img.thumbnail(output_size)
+                
+                # Sobreescribimos el archivo original con la versión optimizada
+                # quality=85 reduce el peso significativamente sin pérdida visual notable
+                img.save(img_path, quality=85, optimize=True)
 
     def __str__(self):
         return self.nombre
