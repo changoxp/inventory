@@ -1,77 +1,108 @@
 {% extends 'core/base.html' %}
 
 {% block content %}
-<style>
-    .breadcrumb-item.active {
-        color: #0d6efd;
-        /* Color primario de Bootstrap */
-        font-weight: 600;
-    }
-
-    .breadcrumb {
-        font-size: 1rem;
-    }
-</style>
-<div class="container mt-4">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb shadow-sm p-3 mb-4 bg-light rounded">
-            <li class="breadcrumb-item"><a href="{% url 'home_categorias' %}">Inicio</a></li>
+<div class="container mt-3">
+    <nav aria-label="breadcrumb" style="font-size: 0.8rem;" class="mb-2">
+        <ol class="breadcrumb shadow-sm px-3 py-2 bg-light rounded border-0">
+            <li class="breadcrumb-item"><a href="{% url 'home_categorias' %}" class="text-decoration-none">Home</a>
+            </li>
             <li class="breadcrumb-item">
-                <a href="{% url 'items_por_categoria' item.subcategoria.categoria.id %}">
+                <a href="{% url 'items_por_categoria' item.subcategoria.categoria.id %}" class="text-decoration-none">
                     {{ item.subcategoria.categoria.nombre }}
                 </a>
             </li>
             <li class="breadcrumb-item">
-                <a href="{% url 'items_por_subcategoria' item.subcategoria.categoria.id item.subcategoria.id %}">
+                <a href="{% url 'items_por_subcategoria' item.subcategoria.categoria.id item.subcategoria.id %}"
+                    class="text-decoration-none">
                     {{ item.subcategoria.nombre }}
                 </a>
             </li>
-            <li class="breadcrumb-item active" aria-current="page">{{ item.nombre }}</li>
+            <li class="breadcrumb-item active fw-bold text-primary">{{ item.nombre }}</li>
         </ol>
     </nav>
 
-    <div class="card shadow border-0">
-        <div class="row g-0">
-            <div class="col-md-4 bg-light d-flex align-items-center justify-content-center p-3">
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm overflow-hidden h-100">
                 {% if item.imagen %}
-                <img src="{{ item.imagen.url }}" class="img-fluid rounded shadow-sm" alt="{{ item.nombre }}"
-                    style="max-height: 400px;">
+                <img src="{{ item.imagen.url }}" class="img-fluid" alt="{{ item.nombre }}"
+                    style="width: 100%; height: 300px; object-fit: contain; background: #f8f9fa;">
                 {% else %}
-                <div class="text-muted text-center">
-                    <i class="bi bi-image" style="font-size: 4rem;"></i>
-                    <p>Sin imagen disponible</p>
+                <div class="d-flex flex-column align-items-center justify-content-center bg-light text-muted"
+                    style="height: 300px;">
+                    <i class="bi bi-image" style="font-size: 3rem;"></i>
+                    <p class="small">Image not available</p>
                 </div>
                 {% endif %}
             </div>
-            <div class="col-md-8">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <h2 class="card-title text-primary">{{ item.nombre }}</h2>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-2 border-bottom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0 text-dark" style="font-size: 1.1rem;">{{ item.nombre }}</h5>
                         <span
-                            class="badge {% if item.stock <= item.stock_minimo %}bg-danger{% else %}bg-success{% endif %} fs-6">
+                            class="badge {% if item.stock <= item.stock_minimo %}bg-danger{% else %}bg-success{% endif %} rounded-pill"
+                            style="font-size: 0.75rem;">
                             Stock: {{ item.stock }}
                         </span>
                     </div>
-                    <p class="text-muted">SKU: <strong>{{ item.sku }}</strong></p>
-                    <hr>
-
-                    <div class="row mt-4">
-                        <div class="col-6">
-                            <p class="mb-1 text-muted">Ubicación / Subcategoría</p>
-                            <h5>{{ item.subcategoria.nombre }}</h5>
+                </div>
+                <div class="card-body py-3">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label class="text-muted small text-uppercase fw-bold d-block mb-0"
+                                style="font-size: 0.65rem;">SKU / Reference</label>
+                            <span class="text-dark fw-medium small font-monospace">
+                                {% if item.sku %}
+                                {{ item.sku }}
+                                {% else %}
+                                <span class="text-muted italic">No SKU</span>
+                                {% endif %}
+                            </span>
                         </div>
-                        <div class="col-6">
-                            <p class="mb-1 text-muted">Stock Mínimo de Alerta</p>
-                            <h5>{{ item.stock_minimo }} unidades</h5>
+                        <div class="col-sm-6">
+                            <label class="text-muted small text-uppercase fw-bold d-block mb-0"
+                                style="font-size: 0.65rem;">Minimum stock</label>
+                            <span class="text-dark small">{{ item.stock_minimo }} units</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="text-muted small text-uppercase fw-bold d-block mb-0"
+                                style="font-size: 0.65rem;">Location</label>
+                            <span class="text-dark small">{{ item.subcategoria.nombre }}</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="text-muted small text-uppercase fw-bold d-block mb-0"
+                                style="font-size: 0.65rem;">Category</label>
+                            <span class="text-dark small">{{ item.subcategoria.categoria.nombre }}</span>
+                        </div>
+
+                        <div class="col-12 mt-2">
+                            <label class="text-muted small text-uppercase fw-bold d-block mb-1"
+                                style="font-size: 0.65rem; letter-spacing: 0.5px;">
+                                Description / additional notes
+                            </label>
+                            <div class="p-2 rounded"
+                                style="background-color: #fdfdfd; border: 1px solid #eee; border-left: 3px solid #012768; font-size: 0.8rem; line-height: 1.4; color: #555;">
+                                {% if item.descripcion %}
+                                {{ item.descripcion|linebreaks }}
+                                {% else %}
+                                <span class="text-muted fst-italic">No description available.</span>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
-
-                    <div class="mt-5 d-flex gap-2">
-                        <a href="{% url 'items_por_subcategoria' item.subcategoria.categoria.id item.subcategoria.id %}"
-                            class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left"></i> Volver a {{ item.subcategoria.nombre }}
-                        </a>
-                    </div>
+                </div>
+                <div class="card-footer bg-white py-2 d-flex justify-content-between">
+                    <a href="{% url 'items_por_subcategoria' item.subcategoria.categoria.id item.subcategoria.id %}"
+                        class="btn btn-sm btn-outline-secondary px-3">
+                        <i class="bi bi-arrow-left me-1"></i> Back
+                    </a>
+                    <a href="{% url 'editar_item' item.id %}" class="btn btn-sm btn-primary px-4"
+                        style="background-color: #012768; border: none;">
+                        <i class="bi bi-pencil me-1"></i> Edit item
+                    </a>
                 </div>
             </div>
         </div>
@@ -116,7 +147,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="5" class="text-center py-3 text-muted small">Sin registros.</td>
+                            <td colspan="5" class="text-center py-3 text-muted small">No records yet.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
