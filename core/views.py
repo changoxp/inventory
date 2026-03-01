@@ -365,7 +365,12 @@ def panel_reportes(request):
 @login_required
 def detalle_item(request, item_id):
     item = get_object_or_404(Item, id=item_id)
-    return render(request, 'core/detalle_item.html', {'item': item})
+    # Get the lastest 10 movements
+    ultimas_transacciones = item.transacciones.all().order_by('-fecha')[:10]
+    return render(request, 'core/detalle_item.html', {
+        'item': item,
+        'transacciones': ultimas_transacciones
+        })
 
 @login_required
 def dashboard(request):

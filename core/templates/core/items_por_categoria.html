@@ -3,47 +3,49 @@
 {% block title %}Inventory - {{ categoria.nombre }}{% endblock %}
 
 {% block content %}
-<div class="row mb-4 align-items-center">
+<div class="row mb-3 align-items-center">
     <div class="col-md-8">
-        <nav aria-label="breadcrumb">
+        <nav aria-label="breadcrumb" style="font-size: 0.8rem;">
             <ol class="breadcrumb mb-1">
                 <li class="breadcrumb-item"><a href="{% url 'home_categorias' %}"
                         class="text-decoration-none">Home</a></li>
                 <li class="breadcrumb-item active">{{ categoria.nombre }}</li>
             </ol>
         </nav>
-        <h2 class="fw-bold text-dark"><i class="bi bi-folder2-open text-primary me-2"></i>{{ categoria.nombre }}</h2>
+        <h4 class="fw-bold text-dark mb-0"><i class="bi bi-folder2-open text-primary me-2"></i>{{ categoria.nombre }}
+        </h4>
     </div>
-    <div class="col-md-4 text-md-end text-start mt-3 mt-md-0">
-        <a href="{% url 'crear_item_subcategoria' subcategoria_activa.id %}" class="btn btn-success shadow-sm">
+    <div class="col-md-4 text-md-end mt-2 mt-md-0">
+        <a href="{% url 'crear_item_subcategoria' subcategoria_activa.id %}" class="btn btn-success btn-sm shadow-sm">
             <i class="bi bi-plus-circle me-1"></i> Add new item
         </a>
     </div>
 </div>
 
-<div class="card border-0 shadow-sm mb-4">
-    <div class="card-body p-2">
-        <div class="input-group">
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-body p-1 px-3">
+        <div class="input-group input-group-sm">
             <span class="input-group-text bg-white border-0"><i class="bi bi-search text-muted"></i></span>
             <input type="text" id="buscadorItems" class="form-control border-0 shadow-none"
-                placeholder="Search by name or SKU...">
+                placeholder="Name or SKU filter..." style="font-size: 0.85rem;">
         </div>
     </div>
 </div>
 
 <div class="row">
-    <div class="col-lg-3 mb-4">
+    <div class="col-lg-3 mb-3">
         <div class="card border-0 shadow-sm overflow-hidden">
-            <div class="card-header text-white fw-bold py-3" style="background-color: #012768;">
+            <div class="card-header text-white fw-bold py-2 small" style="background-color: #012768;">
                 <i class="bi bi-filter-left me-2"></i>Subcategories
             </div>
             <div class="list-group list-group-flush">
                 {% for sub in subcategorias %}
                 <a href="{% url 'items_por_subcategoria' categoria.id sub.id %}"
-                    class="list-group-item list-group-item-action border-0 d-flex justify-content-between align-items-center py-3 {% if sub.id == subcategoria_activa.id %}active-sub{% endif %}">
+                    class="list-group-item list-group-item-action border-0 d-flex justify-content-between align-items-center py-2 {% if sub.id == subcategoria_activa.id %}active-sub{% endif %}"
+                    style="font-size: 0.85rem;">
                     {{ sub.nombre }}
                     {% if sub.id == subcategoria_activa.id %}
-                    <i class="bi bi-chevron-right"></i>
+                    <i class="bi bi-chevron-right" style="font-size: 0.7rem;"></i>
                     {% endif %}
                 </a>
                 {% endfor %}
@@ -54,58 +56,53 @@
     <div class="col-lg-9">
         <div class="card border-0 shadow-sm">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+                <table class="table table-sm table-hover align-middle mb-0" style="font-size: 0.85rem;">
                     <thead class="table-light">
-                        <tr class="text-muted small">
-                            <th class="ps-4 py-3">Item name / SKU</th>
+                        <tr class="text-muted x-small">
+                            <th class="ps-3 py-2">Item name / SKU</th>
                             <th>Stock</th>
-                            <th class="text-end pe-4">Actions</th>
+                            <th class="text-end pe-3">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for item in items %}
                         <tr>
-                            <td class="ps-4">
+                            <td class="ps-3">
                                 <div class="fw-bold text-dark">{{ item.nombre }}</div>
-                                <div class="text-muted x-small font-monospace">{{ item.sku }}</div>
+                                <div class="text-muted font-monospace" style="font-size: 0.7rem;">{{ item.sku }}</div>
                             </td>
                             <td>
-                                {% if item.stock <= 0 %} <span class="badge rounded-pill bg-dark px-3">Agotado</span>
+                                {% if item.stock <= 0 %} <span class="badge rounded-pill bg-dark px-2 py-1"
+                                    style="font-size: 0.7rem;">Out of stock</span>
                                     {% elif item.stock > item.stock_minimo %}
-                                    <span class="badge rounded-pill bg-success px-3">Ok ({{ item.stock }})</span>
-                                    {% elif item.stock == item.stock_minimo %}
-                                    <span class="badge rounded-pill bg-warning text-dark px-3">Low ({{ item.stock}})</span>
+                                    <span class="badge rounded-pill bg-success-subtle text-success border-0 px-2 py-1"
+                                        style="font-size: 0.7rem;">{{ item.stock }} Unit.</span>
                                     {% else %}
-                                    <span class="badge rounded-pill bg-danger px-3">Critical({{ item.stock }})</span>
+                                    <span class="badge rounded-pill bg-danger-subtle text-danger border-0 px-2 py-1"
+                                        style="font-size: 0.7rem;">Low ({{ item.stock }})</span>
                                     {% endif %}
                             </td>
-                            <td class="text-end pe-4">
-                                <div class="btn-group shadow-sm">
-                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
-                                        data-bs-target="#salidaRapidaModal" data-item-id="{{ item.id }}"
-                                        data-item-nombre="{{ item.nombre }}" data-item-stock="{{ item.stock }}"
-                                        title="Express checkout">
-                                        <i class="bi bi-dash-circle"></i>
+                            <td class="text-end pe-3">
+                                <div class="btn-group shadow-none">
+                                    <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2"
+                                        data-bs-toggle="modal" data-bs-target="#salidaRapidaModal"
+                                        data-item-id="{{ item.id }}" data-item-nombre="{{ item.nombre }}"
+                                        data-item-stock="{{ item.stock }}" title="Express checkout">
+                                        <i class="bi bi-dash" style="font-size: 1rem;"></i>
                                     </button>
-                                    <a href="{% url 'detalle_item' item.id %}" class="btn btn-sm btn-outline-primary"
-                                        title="View Item">
+
+                                    <a href="{% url 'detalle_item' item.id %}"
+                                        class="btn btn-sm btn-outline-primary py-0 px-2" title="View full info">
                                         <i class="bi bi-eye"></i>
                                     </a>
-                                    {% load auth_extras %}
-                                    {% if request.user|has_group:"Administrador" or request.user.is_superuser %}
-                                    <a href="{% url 'editar_item' item.id %}" class="btn btn-sm btn-outline-secondary"
-                                        title="Edit item info">
-                                        <i class="bi bi-pencil"></i>
+
+                                    {% if request.user.is_superuser or request.user.is_staff %}
+                                    <a href="{% url 'editar_item' item.id %}"
+                                        class="btn btn-sm btn-outline-secondary py-0 px-2" title="Edit info">
+                                        <i class="bi bi-pencil-square" style="font-size: 0.85rem;"></i>
                                     </a>
                                     {% endif %}
                                 </div>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="4" class="text-center py-5">
-                                <i class="bi bi-box-seam text-muted display-4 d-block mb-3"></i>
-                                <p class="text-muted">No item in this subcategory.</p>
                             </td>
                         </tr>
                         {% endfor %}
@@ -118,14 +115,14 @@
 
 <style>
     .active-sub {
-        background-color: #f8f9fa !important;
+        background-color: #f0f4f8 !important;
         color: #012768 !important;
         font-weight: bold;
-        border-left: 4px solid #012768 !important;
+        border-left: 3px solid #012768 !important;
     }
 
     .x-small {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
     }
 </style>
 
@@ -152,7 +149,8 @@
                     </div>
                 </div>
                 <div class="modal-footer border-0 p-3">
-                    <button type="submit" id="btnConfirmarSalida" class="btn btn-danger w-100 py-2 fw-bold">Save checkout</button>
+                    <button type="submit" id="btnConfirmarSalida" class="btn btn-danger w-100 py-2 fw-bold">Save
+                        checkout</button>
                 </div>
             </form>
         </div>

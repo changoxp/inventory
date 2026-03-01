@@ -76,5 +76,53 @@
             </div>
         </div>
     </div>
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header text-white py-2" style="background-color: #012768;">
+            <h6 class="mb-0 fw-bold small"><i class="bi bi-clock-history me-2"></i>History</h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover align-middle mb-0" style="font-size: 0.8rem;">
+                    <thead class="table-light">
+                        <tr class="text-muted small">
+                            <th class="ps-3 py-2">Date</th>
+                            <th>User</th>
+                            <th>Type</th>
+                            <th class="text-center">Qty</th>
+                            <th class="text-center pe-3">Ending stock</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in transacciones %}
+                        <tr>
+                            <td class="ps-3 text-muted" style="font-size: 0.75rem;">{{ t.fecha|date:"d/m/y H:i" }}</td>
+                            <td class="text-truncate" style="max-width: 120px;">{{ t.usuario|default:"Sistema" }}</td>
+                            <td>
+                                {% if t.tipo == 'ENTRADA' %}
+                                <span class="badge rounded-pill bg-success-subtle text-success border-0 px-2"
+                                    style="font-size: 0.7rem;">In</span>
+                                {% elif t.tipo == 'SALIDA' %}
+                                <span class="badge rounded-pill bg-danger-subtle text-danger border-0 px-2"
+                                    style="font-size: 0.7rem;">Out</span>
+                                {% else %}
+                                <span class="badge rounded-pill bg-warning-subtle text-dark border-0 px-2"
+                                    style="font-size: 0.7rem;">Manual</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center fw-bold">
+                                {% if t.tipo == 'ENTRADA' %}+{% endif %}{{ t.cantidad }}
+                            </td>
+                            <td class="text-center pe-3">{{ t.stock_nuevo }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-3 text-muted small">Sin registros.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
