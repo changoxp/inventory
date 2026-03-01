@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models.signals import pre_save # Usamos pre_save para capturar el stock anterior
 from django.dispatch import receiver
+import os, uuid
 
 # Create your models here.
 class Categoria(models.Model):
@@ -20,6 +21,12 @@ class Subcategoria(models.Model):
     class Meta:
         ordering = ['nombre']
         verbose_name_plural = "Subcategorías"
+        
+def path_imagen_item(instance, filename):
+    extension = os.path.splitext(filename)[1]
+    # Si tiene ID lo usamos, si no (es nuevo), usamos un código único temporal
+    nombre = instance.id if instance.id else uuid.uuid4().hex[:10]
+    return f'productos/{nombre}{extension}'
 
 class Item(models.Model):
     subcategoria = models.ForeignKey(Subcategoria, on_delete=models.CASCADE, related_name='items')
@@ -29,7 +36,7 @@ class Item(models.Model):
     #Minimun Stock - Used for alerts
     stock_minimo = models.PositiveIntegerField(default=0)
     descripcion = models.TextField(blank=True, null=True, verbose_name="Descripción")
-    imagen = models.ImageField(upload_to='productos/', blank=True, null=True, verbose_name="Imagen Referencial")
+    imagen = models.ImageField(upload_to=path_imagen_item, blank=True, null=True, verbose_name="Referential img")
 
     def __str__(self):
         return self.nombre
