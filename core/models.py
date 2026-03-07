@@ -89,10 +89,12 @@ def registrar_movimiento(sender, instance, **kwargs):
         
         if diferencia != 0:
             tipo = 'ENTRADA' if diferencia > 0 else 'SALIDA'
+            usuario_logueado = getattr(instance, '_usuario_operacion', 'System')
             Transaccion.objects.create(
                 item=instance,
                 tipo=tipo,
                 cantidad=diferencia,
                 stock_previo=obj_antiguo.stock,
-                stock_nuevo=instance.stock
+                stock_nuevo=instance.stock,
+                usuario=usuario_logueado
             )

@@ -49,7 +49,6 @@ def salida_rapida(request, item_id):
     if item.stock > 0:
         item.stock -= 1
         item.save() # Esto dispara automáticamente la señal que creamos antes
-    return redirect('lista_inventario')
 
 # Vista para ver todos los movimientos
 @login_required
@@ -126,12 +125,23 @@ def editar_item(request, item_id):
     item = get_object_or_404(Item, id=item_id)
     movimientos = item.transacciones.all().order_by('-fecha')[:10]
     
+    #Prepare the logic to save the transaction
+    stock_previo = Item.objects.get(pk=item.pk).stock
+    
+    
     if request.method == 'POST':
         # Pasamos la instancia actual para que Django sepa qué editar
         form = ItemForm(request.POST, request.FILES, instance=item)
         # Agregamos request.FILES para que la imagen se procese
         if form.is_valid():
-            form.save()
+            
+            
+            # Usamos un nombre con guion bajo para que Django no intente guardarlo en la DB
+            item_obj = form.save(commit=False)
+            item_obj._usuario_operacion = request.user.username
+            
+            item_obj.save()
+            
             return redirect('detalle_item', item_id=item.id)
         else:
             # ESTO ES CLAVE: Si no se guarda, imprime los errores en tu terminal 
@@ -294,18 +304,19 @@ def registrar_movimiento(request, item_id):
             item.stock += cantidad
         elif tipo == 'SALIDA':
             item.stock -= cantidad
-            
+         
+        item._usuario_operacion = request.user.username 
         item.save()
         
         # Registrar la transacción en el historial
-        Transaccion.objects.create(
-            item=item,
-            tipo=tipo,
-            cantidad=cantidad,
-            stock_previo=stock_previo,
-            stock_nuevo=item.stock,
-            usuario=request.user.username
-        )
+        #Transaccion.objects.create(
+        #    item=item,
+        #    tipo=tipo,
+        #    cantidad=cantidad,
+        #    stock_previo=stock_previo,
+        #    stock_nuevo=item.stock,
+        #    usuario=request.user.username
+        #)
         
         messages.success(request, f"Stock actualizado: {item.nombre} ahora tiene {item.stock} unidades.")
         return redirect(request.META.get('HTTP_REFERER', 'home_categorias'))
@@ -328,17 +339,9 @@ def despacho_multiple(request):
                 if cantidad > item.stock:
                     errores.append(f"{item.nombre} (Stock insuficiente: {item.stock})")
                     continue # Salta este item y sigue con el próximo
-
-                # Lógica de descuento
-                stock_previo = item.stock
-                item.stock -= cantidad
-                item.save()
                 
-                Transaccion.objects.create(
-                    item=item, tipo='SALIDA', cantidad=cantidad,
-                    stock_previo=stock_previo, stock_nuevo=item.stock,
-                    usuario=request.user.username
-                )
+                item._usuario_operacion = request.user.username 
+                item.save()
 
         if errores:
             messages.warning(request, f"Se procesaron los cambios, pero hubo problemas con: {', '.join(errores)}")
